@@ -1,15 +1,21 @@
+{% extends "base.html" %}
 {% load custom_filters %}
+{% block title %}
+Lunch Report
+{% endblock %}
+{% block content %}
+<div>
+  {% for lunch_item in All_lunch_items %}
+  <header>
+    <h2>{{lunch_item.name}} Report</h2>
+  </header>
+  {% comment %} need to refactor TODO {% endcomment %}
+  {% include "includes/single_lunch_item_report.html" with lunch_item=lunch_item  lunch_item_name=lunch_item.name orders_detail=orders_detail|get_item:lunch_item.name each_type_orders_detail=orders_detail|get_item:lunch_item.name each_type_total_quantity=each_total_quantity_of_all_lunch_item|get_item:lunch_item.name %}
+ {% endfor %}
+  </div> 
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Lunch Report</title>
-  </head>
-  <body>
-    TODO: Please implement the separate & combined lunch report. Feel free to add more template files as you see fit.
-  </body>
-</html>
+{% endblock %}
+
 
 
 

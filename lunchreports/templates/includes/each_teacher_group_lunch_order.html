@@ -1,0 +1,22 @@
+<tr>
+    {% if teacher_name != '-' %}
+    <td rowspan="{{ data.customers|length|add:2 }}">{{ teacher_name }}</td>
+    {% endif %}
+    
+    {% for customer_order in data.customers %}
+    <tr>
+        {% if teacher_name == '-' %}
+        <td>{{ teacher_name }}</td>
+        {% endif %}
+        <td>{{ customer_order.customer }}</td>
+        
+        <td>{{ customer_order.total_quantity }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        {% if teacher_name != '-' %}
+        <td>Total</td>
+        <td>{{ data.group_quantity }}</td>
+        {% endif %}
+    </tr>
+</tr>

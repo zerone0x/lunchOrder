@@ -1,0 +1,14 @@
+<table>
+    <tr>
+        <th>Teacher</th>
+        <th>Student</th>
+        <th>{{lunch_item_name}} Quantity</th>
+    </tr>
+    {% for teacher_name, data in orders_detail.items %}
+        {% include "includes/each_teacher_group_lunch_order.html" with teacher_name=teacher_name data=data %}
+    {% endfor %}
+    <tr class="total-quantity-row">
+        <td colspan="2">Total Quantity</td>
+        <td>{{each_type_total_quantity}}</td>
+    </tr>
+</table>

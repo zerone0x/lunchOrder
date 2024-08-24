@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% block title %}
+{{ title }}
+{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+
+<ul>
+  {% comment %} {% for data in report_data %}
+  <li>{{ data.name }} - {{ data.teacher }}</li> {% endcomment %}
+
+  {% comment %} 类似的抽象 类比子组件的复用 {% endcomment %}
+  {% comment %} {% include "blog/includes/post.html" %} {% endcomment %}
+  {% comment %} {% endfor %} {% endcomment %}
+  </ul>
+{% endblock %}
+
+
+
+

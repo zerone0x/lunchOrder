@@ -1,11 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Index Page</title>
-  </head>
-  <body>
-    <a href="order_report/">Lunch Order Report</a> <br/>
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+Index Page
+{% endblock %}
+{% block css_files %}
+<link rel="stylesheet" href="{% static "index.css" %}">
+{% endblock %}
+{% block content %}
+<header>
+  <h1>Report here:</h1>
+</header>
+<section>
+    <a href="{% url 'order_report' %}">Lunch Order Report</a> <br/>
     <a href="combined_order_report/">Combined Lunch Order Report</a>
-  </body>
-</html>
+</section>
+{% endblock %}
+

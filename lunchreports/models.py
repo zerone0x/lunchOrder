@@ -14,10 +14,10 @@ class Student(models.Model):
   teacher = models.ForeignKey(Teacher,
                               on_delete=models.SET_NULL,
                               null=True,
-                              blank=True)
-
+                              blank=True,
+                              related_name="students")
   def __str__(self):
-    return self.name
+    return f"{self.name} - {self.teacher}"
 
 
 # Represents an item that can be ordered (e.g. pizza, sandwich, water, cookie, etc.)
