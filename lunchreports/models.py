@@ -56,3 +56,5 @@ class LunchItemOrder(models.Model):
 
   def __str__(self):
     return f"{self.lunch_item} ({self.quantity}) - {self.student or self.teacher}"
+
+

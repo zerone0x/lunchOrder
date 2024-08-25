@@ -6,16 +6,64 @@
 {% block content %}
 <h1>{{ title }}</h1>
 
-<ul>
-  {% comment %} {% for data in report_data %}
-  <li>{{ data.name }} - {{ data.teacher }}</li> {% endcomment %}
+<table>
+  <tr>
+      <th rowspan="2">Teacher</th>
+      <th rowspan="2">Student</th>
+      {% for item in lunch_items %}
+      <th>{{ item.name }}</th>
+      {% endfor %}
+  </tr>
+  <tr></tr> <!-- 添加一个空行以匹配表头结构 -->
 
-  {% comment %} 类似的抽象 类比子组件的复用 {% endcomment %}
-  {% comment %} {% include "blog/includes/post.html" %} {% endcomment %}
-  {% comment %} {% endfor %} {% endcomment %}
-  </ul>
+  {% for teacher_name, student_data in teacher_student_data.items %}
+  <tr>
+      <td rowspan="{{ student_data|length|add:1 }}">{{ teacher_name }}</td> <!-- 修正行跨度 -->
+      {% for student_name in student_data %}
+      <tr>
+          <td>{{ student_name }}</td>
+          {% for item in lunch_items %}
+          {% with total=orders_detail|get_item:item.name|get_item:teacher_name %}
+        {% comment %} {% if student_name not in total.customers %}
+        <td>-</td>
+        {% endif %} {% endcomment %}
+        {% comment %} total.customers 改成dictoionary 比较容易 {% endcomment %}
+          {% for customer in total.customers %}
+        {% if customer.customer == student_name %}
+        <td>{{ customer.total_quantity }}</td>
+        {% endif %}
+        {% endfor %}
+          {% endwith %}
+          {% endfor %}
+      </tr>
+      {% endfor %}
+      <tr>
+          <td colspan="2">Total</td>
+          {% for item in lunch_items %}
+          {% with total=orders_detail|get_item:item.name|get_item:teacher_name %}
+        <td>{{ total.group_quantity|default:"-" }}</td>
+        {% endwith %}
+          {% endfor %}
+      </tr>
+  {% endfor %}
+
+  <tr class="total-quantity-row">
+    <td colspan="2">Total Quantity</td>
+    {% for item in lunch_items %}
+    <td>{{each_total_quantity_of_all_lunch_item|get_item:item.name}}</td>
+    {% endfor %}
+  </tr>
+
+</table>
 {% endblock %}
 
 
 
 
+    {% comment %} {% for teacher_name, data in orders_detail.items %}
+        {% include "includes/each_teacher_group_lunch_order.html" with teacher_name=teacher_name data=data %}
+    {% endfor %}
+    <tr class="total-quantity-row">
+        <td colspan="2">Total Quantity</td>
+        <td>{{each_type_total_quantity}}</td>
+    </tr> {% endcomment %}

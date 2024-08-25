@@ -1,0 +1,10 @@
+{% for teacher_name, data in orders_detail.items %}
+{% comment %} <p>{{teacher_name}}</p>
+<p>{{data}}</p> {% endcomment %}
+{% comment %} {% include "includes/each_teacher_group_lunch_order.html" with teacher_name=teacher_name data=data %} {% endcomment %}
+{% endfor %}
+
+{% for teacher_name, data in teacher_student_data.items %}
+{% comment %} <p>{{teacher_name}}</p>
+<p>{{data}}</p> {% endcomment %}
+{% endfor %}
