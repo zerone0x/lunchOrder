@@ -53,7 +53,7 @@ def _get_grouped_orders(lunch_items):
     Returns:
         dict: A dictionary where the keys are teacher names and the values are dictionaries containing the group quantity and customers.
     """
-    return {item.name: _calculate_total_quantity_for_lunch_item(item) for item in lunch_items}
+    return {item.name: _organize_orders_by_teacher(_fetch_orders_details(item)) for item in lunch_items}
             
 
 def _calculate_total_quantity_for_lunch_item(lunch_item):
@@ -149,15 +149,7 @@ def lunch_report(request):
     try:
         lunch_items = _get_lunch_items_from_request(request)
         total_quantity_of_all_lunch_item = _get_total_quantity(lunch_items)
-        print('total_quantity_of_all_lunch_item-------------------', total_quantity_of_all_lunch_item)
         orders_detail = _get_grouped_orders(lunch_items)
-        print('orders_detail-------------------', orders_detail)
-        total_quantity_of_all_lunch_item = {
-        item.name: _calculate_total_quantity_for_lunch_item(item) for item in lunch_items
-    }
-        orders_detail = {
-            item.name: _organize_orders_by_teacher(_fetch_orders_details(item)) for item in lunch_items
-        }
 
         return render(request, 'lunch_order_report.html', {
             'All_lunch_items': lunch_items,
@@ -181,12 +173,8 @@ def combined_lunch_report(request):
     lunch_items = _get_lunch_items_from_request(request)
     title = _generate_title(lunch_items)
      # Use the helper function to get the list of lunch items
-    total_quantity_of_all_lunch_item = {
-        item.name: _calculate_total_quantity_for_lunch_item(item) for item in lunch_items
-    }
-    orders_detail = {
-        item.name: _organize_orders_by_teacher(_fetch_orders_details(item)) for item in lunch_items
-    }
+    total_quantity_of_all_lunch_item = _get_total_quantity(lunch_items)
+    orders_detail = _get_grouped_orders(lunch_items)
     teacher_student_data = _get_all_students_for_teacher()
     print('teacher_student_data-------------------', teacher_student_data)
     print('orders_detail-------------------', orders_detail)
