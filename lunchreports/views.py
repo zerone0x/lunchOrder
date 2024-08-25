@@ -24,24 +24,13 @@ def _get_lunch_items_from_request(request):
     return list(LunchItem.objects.all())
   return lunch_item_model_list
 
-def _generate_title(lunch_items):
-    """
-    Generate the title for the combined lunch report.
-
-    Args:
-        lunch_items (list): A list of lunch items.
-    
-    Returns:
-        str: The title for the combined lunch report.
-    """
-    names = [item.name for item in lunch_items]
-    names_string = ' '.join(names)
-    title = names_string + ' Report'
-    return title
+def generate_report_title(lunch_items):
+    names = ' '.join(item.name for item in lunch_items)
+    return f'{names} Report'
 
 
 def _get_total_quantity(lunch_items):
-    return {item.name: _calculate_total_quantity_for_lunch_item(item) for item in lunch_items}
+    return {item.name: _calculate_total_quantity(item) for item in lunch_items}
 
 def _get_grouped_orders(lunch_items):
     """
@@ -53,10 +42,9 @@ def _get_grouped_orders(lunch_items):
     Returns:
         dict: A dictionary where the keys are teacher names and the values are dictionaries containing the group quantity and customers.
     """
-    return {item.name: _organize_orders_by_teacher(_fetch_orders_details(item)) for item in lunch_items}
+    return {item.name: _organize_orders_by_teacher(_fetch_order_details(item)) for item in lunch_items}
             
-
-def _calculate_total_quantity_for_lunch_item(lunch_item):
+def _calculate_total_quantity(lunch_item):
     """
     Calculate the total quantity for a given lunch item.
 
@@ -85,7 +73,7 @@ def _get_all_students_for_teacher():
     teacher_student_data['-'] = [student.name for student in students_without_teacher]
     return teacher_student_data
 
-def _fetch_orders_details(lunch_item):
+def _fetch_order_details(lunch_item):
     """
     Fetch the orders grouped by teacher.
 
@@ -171,7 +159,7 @@ def lunch_report(request):
 
 def combined_lunch_report(request):
     lunch_items = _get_lunch_items_from_request(request)
-    title = _generate_title(lunch_items)
+    title = generate_report_title(lunch_items)
      # Use the helper function to get the list of lunch items
     total_quantity_of_all_lunch_item = _get_total_quantity(lunch_items)
     orders_detail = _get_grouped_orders(lunch_items)
@@ -188,4 +176,5 @@ def combined_lunch_report(request):
     })
     return populate_pdf_response(
       report_title="Combined Lunch Order Report",
-      report_template="lunchreports/templates/combined_order_report.html")
+      report_template="lunchreports/templates/combined_order_report.html",
+      )
