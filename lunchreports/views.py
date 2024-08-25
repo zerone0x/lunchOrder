@@ -28,50 +28,17 @@ def generate_report_title(lunch_items):
     names = ' '.join(item.name for item in lunch_items)
     return f'{names} Report'
 
-
-def _get_total_quantity(lunch_items):
-    return {item.name: _calculate_total_quantity(item) for item in lunch_items}
-
-def _get_grouped_orders(lunch_items):
-    """
-    Group the orders by teachers.
-
-    Args:
-        lunch_item_orders (list): A list of orders.
-    
-    Returns:
-        dict: A dictionary where the keys are teacher names and the values are dictionaries containing the group quantity and customers.
-    """
-    return {item.name: _organize_orders_by_teacher(_fetch_order_details(item)) for item in lunch_items}
-            
 def _calculate_total_quantity(lunch_item):
     """
     Calculate the total quantity for a given lunch item.
-
-    Args:
-        lunch_item (LunchItem): The lunch item to calculate the total quantity for.
-    
-    Returns:
-        int: The total quantity for the given lunch item.
     """
-    total_quantity = LunchItemOrder.objects.filter(lunch_item=lunch_item).aggregate(total=Sum('quantity'))['total']
-    return total_quantity or 0
+    return LunchItemOrder.objects.filter(lunch_item=lunch_item).aggregate(total=Sum('quantity'))['total'] or 0
 
-def _get_all_students_for_teacher():
+def _get_total_quantity(lunch_items):
     """
-    Retrieve all teachers and their associated students.
-    
-    Returns:
-        dict: A dictionary where the keys are teacher names and the values are lists of student names associated with each teacher.
-        '-': A list of student names without a teacher.
-        teacher_student_data: A dictionary where the keys are teacher names and the values are lists of student names associated with each teacher.
+    Calculate the total quantity for a given list of lunch items.
     """
-    teachers_with_students = Teacher.objects.prefetch_related(Prefetch('students')).all()
-    teacher_student_data = {teacher.name: [student.name for student in teacher.students.all()] + [teacher.name] for teacher in teachers_with_students}
-
-    students_without_teacher = Student.objects.filter(teacher__isnull=True)
-    teacher_student_data['-'] = [student.name for student in students_without_teacher]
-    return teacher_student_data
+    return {item.name: _calculate_total_quantity(item) for item in lunch_items}
 
 def _fetch_order_details(lunch_item):
     """
@@ -133,6 +100,39 @@ def _organize_orders_by_teacher(lunch_item_orders):
 
     return ordered_grouped
 
+def _get_grouped_orders(lunch_items):
+    """
+    Group the orders by teachers.
+
+    Args:
+        lunch_item_orders (list): A list of orders.
+    
+    Returns:
+        dict: A dictionary where the keys are teacher names and the values are dictionaries containing the group quantity and customers.
+    """
+    return {item.name: _organize_orders_by_teacher(_fetch_order_details(item)) 
+            for item in lunch_items}
+            
+def _get_all_students_for_teacher():
+    """
+    Retrieve all teachers and their associated students.
+    
+    Returns:
+        dict: A dictionary where the keys are teacher names and the values are lists of student names associated with each teacher.
+        '-': A list of student names without a teacher.
+        teacher_student_data: A dictionary where the keys are teacher names and the values are lists of student names associated with each teacher.
+    """
+    teachers_with_students = Teacher.objects.prefetch_related(Prefetch('students')).all()
+    teacher_student_data = {teacher.name: [student.name for student in teacher.students.all()] + [teacher.name] for teacher in teachers_with_students}
+
+    students_without_teacher = Student.objects.filter(teacher__isnull=True)
+    teacher_student_data['-'] = [student.name for student in students_without_teacher]
+    return teacher_student_data
+
+
+
+
+
 def lunch_report(request):
     try:
         lunch_items = _get_lunch_items_from_request(request)
@@ -146,7 +146,8 @@ def lunch_report(request):
             'orders_detail': orders_detail,
         })
     except Exception as e:
-        print(e)
+        logging.error(f"Error generating lunch report: {e}")
+        raise
     # return populate_pdf_response(
     #   report_title="Lunch Order Report by Item",
     #   report_template="lunchreports/templates/lunch_order_report.html",
@@ -158,23 +159,25 @@ def lunch_report(request):
 
 
 def combined_lunch_report(request):
-    lunch_items = _get_lunch_items_from_request(request)
-    title = generate_report_title(lunch_items)
-     # Use the helper function to get the list of lunch items
-    total_quantity_of_all_lunch_item = _get_total_quantity(lunch_items)
-    orders_detail = _get_grouped_orders(lunch_items)
-    teacher_student_data = _get_all_students_for_teacher()
-    print('teacher_student_data-------------------', teacher_student_data)
-    print('orders_detail-------------------', orders_detail)
-    print('total_quantity_of_all_lunch_item-------------------', total_quantity_of_all_lunch_item)
-    return render(request, 'combined_order_report.html',{
-        "title": title,
-        "orders_detail": orders_detail,
-        "total_quantity_of_all_lunch_item": total_quantity_of_all_lunch_item,
-        "lunch_items": lunch_items,
-        "teacher_student_data": teacher_student_data,
-    })
-    return populate_pdf_response(
-      report_title="Combined Lunch Order Report",
-      report_template="lunchreports/templates/combined_order_report.html",
-      )
+    try:
+        lunch_items = _get_lunch_items_from_request(request)
+        title = generate_report_title(lunch_items)
+        total_quantity_of_all_lunch_item = _get_total_quantity(lunch_items)
+        orders_detail = _get_grouped_orders(lunch_items)
+        teacher_student_data = _get_all_students_for_teacher()
+
+        return render(request, 'combined_order_report.html', {
+            "title": title,
+            "orders_detail": orders_detail,
+            "total_quantity_of_all_lunch_item": total_quantity_of_all_lunch_item,
+            "lunch_items": lunch_items,
+            "teacher_student_data": teacher_student_data,
+        })
+    except Exception as e:
+        logging.error(f"Error generating combined lunch report: {e}")
+        # Optionally, return an error page or message
+        # return render(request, 'error_page.html', {"error": "An error occurred while generating the report."})
+    # return populate_pdf_response(
+    #   report_title="Combined Lunch Order Report",
+    #   report_template="lunchreports/templates/combined_order_report.html",
+    #   )
