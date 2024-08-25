@@ -21,22 +21,21 @@
       <td rowspan="{{ student_data|length|add:1 }}">{{ teacher_name }}</td> <!-- 修正行跨度 -->
       {% for student_name in student_data %}
       <tr>
-          <td>{{ student_name }}</td>
-          {% for item in lunch_items %}
-          {% with total=orders_detail|get_item:item.name|get_item:teacher_name %}
-        {% comment %} {% if student_name not in total.customers %}
+        <td>{{ student_name }}</td>
+        {% for item in lunch_items %}
+        {% with total=orders_detail|get_item:item.name|get_item:teacher_name %}
+        {% if total %}
+        {% with quantity=total.customers|get_item:student_name %}
+        <td>{{ quantity|default:"-" }}</td>
+        {% endwith %}
+        {% else %}
         <td>-</td>
-        {% endif %} {% endcomment %}
-        {% comment %} total.customers 改成dictoionary 比较容易 {% endcomment %}
-          {% for customer in total.customers %}
-        {% if customer.customer == student_name %}
-        <td>{{ customer.total_quantity }}</td>
         {% endif %}
+        {% endwith %}
         {% endfor %}
-          {% endwith %}
-          {% endfor %}
-      </tr>
+    </tr>
       {% endfor %}
+      {% if teacher_name != '-' %}
       <tr>
           <td colspan="2">Total</td>
           {% for item in lunch_items %}
@@ -45,12 +44,13 @@
         {% endwith %}
           {% endfor %}
       </tr>
+      {% endif %}
   {% endfor %}
 
   <tr class="total-quantity-row">
     <td colspan="2">Total Quantity</td>
     {% for item in lunch_items %}
-    <td>{{each_total_quantity_of_all_lunch_item|get_item:item.name}}</td>
+    <td>{{total_quantity_of_all_lunch_item|get_item:item.name}}</td>
     {% endfor %}
   </tr>
 
@@ -58,12 +58,3 @@
 {% endblock %}
 
 
-
-
-    {% comment %} {% for teacher_name, data in orders_detail.items %}
-        {% include "includes/each_teacher_group_lunch_order.html" with teacher_name=teacher_name data=data %}
-    {% endfor %}
-    <tr class="total-quantity-row">
-        <td colspan="2">Total Quantity</td>
-        <td>{{each_type_total_quantity}}</td>
-    </tr> {% endcomment %}
