@@ -55,8 +55,6 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         "DIRS": [
-            # Check later TODO 
-            BASE_DIR / "templates",
             str(BASE_DIR / "lunchreports" / "templates")
         ],
         'APP_DIRS': True,
