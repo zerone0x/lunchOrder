@@ -139,22 +139,23 @@ def lunch_report(request):
         total_quantity_of_all_lunch_item = _get_total_quantity(lunch_items)
         orders_detail = _get_grouped_orders(lunch_items)
 
-        return render(request, 'lunch_order_report.html', {
-            'All_lunch_items': lunch_items,
-            'title': 'Lunch Order Report',
-            'total_quantity_of_all_lunch_item': total_quantity_of_all_lunch_item,
-            'orders_detail': orders_detail,
-        })
+        # return render(request, 'lunch_order_report.html', {
+        #     'All_lunch_items': lunch_items,
+        #     'title': 'Lunch Order Report',
+        #     'total_quantity_of_all_lunch_item': total_quantity_of_all_lunch_item,
+        #     'orders_detail': orders_detail,
+        # })
+        return populate_pdf_response(
+        report_title="Lunch Order Report by Item",
+        report_template="lunchreports/templates/lunch_order_report.html",
+        All_lunch_items=lunch_items,
+        total_quantity_of_all_lunch_item=total_quantity_of_all_lunch_item,
+        orders_detail=orders_detail,
+        )
     except Exception as e:
         logging.error(f"Error generating lunch report: {e}")
         raise
-    # return populate_pdf_response(
-    #   report_title="Lunch Order Report by Item",
-    #   report_template="lunchreports/templates/lunch_order_report.html",
-    #   All_lunch_items=lunch_items,
-    # total_quantity_of_all_lunch_item=total_quantity_of_all_lunch_item,
-    # orders_detail=orders_detail,
-    #   )
+  
 
 
 
@@ -166,18 +167,24 @@ def combined_lunch_report(request):
         orders_detail = _get_grouped_orders(lunch_items)
         teacher_student_data = _get_all_students_for_teacher()
 
-        return render(request, 'combined_order_report.html', {
-            "title": title,
-            "orders_detail": orders_detail,
-            "total_quantity_of_all_lunch_item": total_quantity_of_all_lunch_item,
-            "lunch_items": lunch_items,
-            "teacher_student_data": teacher_student_data,
-        })
+        # return render(request, 'combined_order_report.html', {
+        #     "title": title,
+        #     "orders_detail": orders_detail,
+        #     "total_quantity_of_all_lunch_item": total_quantity_of_all_lunch_item,
+        #     "lunch_items": lunch_items,
+        #     "teacher_student_data": teacher_student_data,
+        # })
+        return populate_pdf_response(
+        report_title="Combined Lunch Order Report",
+        report_template="lunchreports/templates/combined_order_report.html",
+        title=title,
+        orders_detail=orders_detail,
+        total_quantity_of_all_lunch_item=total_quantity_of_all_lunch_item,
+        lunch_items=lunch_items,
+        teacher_student_data=teacher_student_data
+        )
     except Exception as e:
         logging.error(f"Error generating combined lunch report: {e}")
         # Optionally, return an error page or message
         # return render(request, 'error_page.html', {"error": "An error occurred while generating the report."})
-    # return populate_pdf_response(
-    #   report_title="Combined Lunch Order Report",
-    #   report_template="lunchreports/templates/combined_order_report.html",
-    #   )
+    

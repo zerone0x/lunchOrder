@@ -1,22 +1,24 @@
-<tr>
-    {% if teacher_name != '-' %}
-    <td rowspan="{{ data.customers|length|add:2 }}">{{ teacher_name }}</td>
-    {% endif %}
-    
-    {% for customer_name, quantity in data.customers.items %}
-    <tr>
-        {% if teacher_name == '-' %}
-        <td>{{ teacher_name }}</td>
-        {% endif %}
-        <td>{{ customer_name }}</td>
-        
-        <td>{{ quantity }}</td>
-    </tr>
-    {% endfor %}
+<tbody>
     <tr>
         {% if teacher_name != '-' %}
-        <td>Total</td>
-        <td>{{ data.group_quantity }}</td>
+        <td rowspan="{{ data.customers|length|add:2 }}">{{ teacher_name }}</td>
         {% endif %}
+        
+        {% for customer_name, quantity in data.customers.items %}
+        <tr>
+            {% if teacher_name == '-' %}
+            <td>{{ teacher_name }}</td>
+            {% endif %}
+            <td>{{ customer_name }}</td>
+            
+            <td>{{ quantity }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            {% if teacher_name != '-' %}
+            <td>Total</td>
+            <td>{{ data.group_quantity }}</td>
+            {% endif %}
+        </tr>
     </tr>
-</tr>
+    </tbody>
