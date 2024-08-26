@@ -1,77 +1,14 @@
 {% extends "base.html" %}
-{% load custom_filters %}
-{% block title %}
-{{ title }}
-{% endblock %}
-{% block content %}
+ {% load custom_filters %}
+ {% block title %}
+ {{ title}}
+ {% endblock %}
+ {% block content %}
 <h1>{{ title }}</h1>
 
 <table>
-  <tr>
-      <th  >Teacher</th>
-      <th  >Student</th>
-      {% for item in lunch_items %}
-      <th>{{ item.name }}</th>
-      {% endfor %}
-  </tr>
-
-  {% for teacher_name, student_data in teacher_student_data.items %}
-  {% if teacher_name != '-' %}
-    <tr>
-      <td rowspan="{{ student_data|length }}">{{ teacher_name }}</td>
-      <td>{{ student_data.0 }}</td>
-      {% for item in lunch_items %}
-        {% with total=orders_detail|get_item:item.name|get_item:teacher_name %}
-          {% if total %}
-            {% with quantity=total.customers|get_item:student_data.0 %}
-              <td>{{ quantity|default:"-" }}</td>
-            {% endwith %}
-          {% else %}
-            <td>-</td>
-          {% endif %}
-        {% endwith %}
-      {% endfor %}
-    </tr>
-  {% endif %}
-  {% for student_name in student_data|slice:"1:" %}
-    <tr>
-      {% if teacher_name == '-' %}
-        <td>{{ teacher_name }}</td>
-      {% endif %}
-      <td>{{ student_name }}</td>
-      {% for item in lunch_items %}
-        {% with total=orders_detail|get_item:item.name|get_item:teacher_name %}
-          {% if total %}
-            {% with quantity=total.customers|get_item:student_name %}
-              <td>{{ quantity|default:"-" }}</td>
-            {% endwith %}
-          {% else %}
-            <td>-</td>
-          {% endif %}
-        {% endwith %}
-      {% endfor %}
-    </tr>
-  {% endfor %}
-  {% if teacher_name != '-' %}
-    <tr>
-      <td colspan="2">Total</td>
-      {% for item in lunch_items %}
-        {% with total=orders_detail|get_item:item.name|get_item:teacher_name %}
-          <td>{{ total.group_quantity|default:"-" }}</td>
-        {% endwith %}
-      {% endfor %}
-    </tr>
-  {% endif %}
-{% endfor %}
-
-  <tr class="total-quantity-row">
-    <td colspan="2">Total Quantity</td>
-    {% for item in lunch_items %}
-    <td>{{total_quantity_of_all_lunch_item|get_item:item.name}}</td>
-    {% endfor %}
-  </tr>
-
+  {% include "includes/table_head.html" with items=lunch_items %}
+  {% include "includes/combined_table.html" with orders_detail=orders_detail lunch_items=lunch_items teacher_student_data=teacher_student_data  %}
+  {% include "includes/table_foot.html" with total_quantity_of_all_lunch_item=total_quantity_of_all_lunch_item lunch_items=lunch_items %}
 </table>
 {% endblock %}
-
-

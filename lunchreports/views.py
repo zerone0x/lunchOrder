@@ -10,7 +10,6 @@ from django.http import Http404
 from django.db.models import F, Value, Case, When, CharField, Sum, Prefetch
 from .models import LunchItemOrder, LunchItem, Teacher, Student
 
-
 def index(request):
   return render(request, 'index.html')
 
@@ -28,27 +27,21 @@ def generate_report_title(lunch_items):
     names = ' '.join(item.name for item in lunch_items)
     return f'{names} Report'
 
-def _calculate_total_quantity(lunch_item):
+def _calculate_lunch_item_total_quantity(lunch_item):
     """
     Calculate the total quantity for a given lunch item.
     """
     return LunchItemOrder.objects.filter(lunch_item=lunch_item).aggregate(total=Sum('quantity'))['total'] or 0
 
-def _get_total_quantity(lunch_items):
+def _calculate_total_quantities(lunch_items):
     """
-    Calculate the total quantity for a given list of lunch items.
+    Calculate the total quantity for a list of lunch items.
     """
-    return {item.name: _calculate_total_quantity(item) for item in lunch_items}
+    return {item.name: _calculate_lunch_item_total_quantity(item) for item in lunch_items}
 
-def _fetch_order_details(lunch_item):
+def _fetch_lunch_item_order_details(lunch_item):
     """
-    Fetch the orders grouped by teacher.
-
-    Args:
-        lunch_item (LunchItem): The lunch item to fetch orders for.
-    
-    Returns:
-        QuerySet: A QuerySet of orders grouped by teacher.
+    Fetch order details grouped by teacher.
     """
     return (
         LunchItemOrder.objects
@@ -72,15 +65,9 @@ def _fetch_order_details(lunch_item):
         .order_by('teacher_name', 'customer')
     )
 
-def _organize_orders_by_teacher(lunch_item_orders):
+def _group_orders_by_teacher(lunch_item_orders):
     """
-    Group the orders by teachers.
-
-    Args:
-        lunch_item_orders (list): A list of orders.
-    
-    Returns:
-        dict: A dictionary where the keys are teacher names and the values are dictionaries containing the group quantity and customers.
+    Organize orders by teacher.
     """
     grouped_orders = {}
     for order in lunch_item_orders:
@@ -100,27 +87,16 @@ def _organize_orders_by_teacher(lunch_item_orders):
 
     return ordered_grouped
 
-def _get_grouped_orders(lunch_items):
+def  _get_orders_grouped_by_teacher(lunch_items):
     """
-    Group the orders by teachers.
-
-    Args:
-        lunch_item_orders (list): A list of orders.
-    
-    Returns:
-        dict: A dictionary where the keys are teacher names and the values are dictionaries containing the group quantity and customers.
+    Get grouped orders for a list of lunch items.
     """
-    return {item.name: _organize_orders_by_teacher(_fetch_order_details(item)) 
+    return {item.name: _group_orders_by_teacher(_fetch_lunch_item_order_details(item)) 
             for item in lunch_items}
             
-def _get_all_students_for_teacher():
+def _get_students_grouped_by_teacher():
     """
     Retrieve all teachers and their associated students.
-    
-    Returns:
-        dict: A dictionary where the keys are teacher names and the values are lists of student names associated with each teacher.
-        '-': A list of student names without a teacher.
-        teacher_student_data: A dictionary where the keys are teacher names and the values are lists of student names associated with each teacher.
     """
     teachers_with_students = Teacher.objects.prefetch_related(Prefetch('students')).all()
     teacher_student_data = {teacher.name: [student.name for student in teacher.students.all()] + [teacher.name] for teacher in teachers_with_students}
@@ -136,11 +112,11 @@ def _get_all_students_for_teacher():
 def lunch_report(request):
     try:
         lunch_items = _get_lunch_items_from_request(request)
-        total_quantity_of_all_lunch_item = _get_total_quantity(lunch_items)
-        orders_detail = _get_grouped_orders(lunch_items)
+        total_quantity_of_all_lunch_item = _calculate_total_quantities(lunch_items)
+        orders_detail =  _get_orders_grouped_by_teacher(lunch_items)
 
         # return render(request, 'lunch_order_report.html', {
-        #     'All_lunch_items': lunch_items,
+        #     'lunch_items': lunch_items,
         #     'title': 'Lunch Order Report',
         #     'total_quantity_of_all_lunch_item': total_quantity_of_all_lunch_item,
         #     'orders_detail': orders_detail,
@@ -148,7 +124,7 @@ def lunch_report(request):
         return populate_pdf_response(
         report_title="Lunch Order Report by Item",
         report_template="lunchreports/templates/lunch_order_report.html",
-        All_lunch_items=lunch_items,
+        lunch_items=lunch_items,
         total_quantity_of_all_lunch_item=total_quantity_of_all_lunch_item,
         orders_detail=orders_detail,
         )
@@ -163,9 +139,9 @@ def combined_lunch_report(request):
     try:
         lunch_items = _get_lunch_items_from_request(request)
         title = generate_report_title(lunch_items)
-        total_quantity_of_all_lunch_item = _get_total_quantity(lunch_items)
-        orders_detail = _get_grouped_orders(lunch_items)
-        teacher_student_data = _get_all_students_for_teacher()
+        total_quantity_of_all_lunch_item = _calculate_total_quantities(lunch_items)
+        orders_detail =  _get_orders_grouped_by_teacher(lunch_items)
+        teacher_student_data = _get_students_grouped_by_teacher()
 
         # return render(request, 'combined_order_report.html', {
         #     "title": title,

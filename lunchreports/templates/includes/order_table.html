@@ -1,0 +1,26 @@
+<tbody>
+    {% for teacher_name, data in orders_detail.items %}
+        {% if teacher_name != '-' %}
+            <tr>
+                <td rowspan="{{ data.customers|length|add:1 }}">{{ teacher_name }}</td>
+                {% for customer_name, quantity in data.customers.items %}
+                    <td>{{ customer_name }}</td>
+                    <td>{{ quantity }}</td>
+                </tr>
+                {% endfor %}
+                {% comment %} TODO - add css for total {% endcomment %}
+            <tr>
+                <td>Total</td>
+                <td>{{ data.group_quantity }}</td>
+            </tr>
+        {% else %}
+            {% for customer_name, quantity in data.customers.items %}
+                <tr>
+                    <td>{{ teacher_name }}</td>
+                    <td>{{ customer_name }}</td>
+                    <td>{{ quantity }}</td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+  </tbody>

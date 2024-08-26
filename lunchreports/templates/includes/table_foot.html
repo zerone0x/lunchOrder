@@ -1,0 +1,13 @@
+{% load custom_filters %}
+<tfoot>
+    <tr class="total-quantity-row">
+        <td colspan="2">Total Quantity</td>
+        {% if single_total_quantity %}
+        <td>{{ single_total_quantity }}</td>
+        {% else %}
+           {% for item in lunch_items %}
+        <td>{{ total_quantity_of_all_lunch_item|get_item:item.name }}</td>
+    {% endfor %}
+        {% endif %}
+    </tr>
+</tfoot>

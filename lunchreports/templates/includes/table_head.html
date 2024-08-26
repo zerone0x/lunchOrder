@@ -1,0 +1,13 @@
+<thead>
+    <tr>
+        <th>Teacher</th>
+        <th>Student</th>
+        {% if single_item %}
+            <th>{{ single_item }}</th>
+        {% else %}
+            {% for item in items %}
+                <th>{{ item.name }}</th>
+            {% endfor %}
+        {% endif %}
+    </tr>
+</thead>
