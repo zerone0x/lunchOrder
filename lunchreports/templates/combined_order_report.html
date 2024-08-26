@@ -7,8 +7,8 @@
 <h1>{{ title }}</h1>
 
 <table>
-  {% include "includes/table_head.html" with items=lunch_items %}
-  {% include "includes/combined_table.html" with orders_detail=orders_detail lunch_items=lunch_items teacher_student_data=teacher_student_data  %}
-  {% include "includes/table_foot.html" with total_quantity_of_all_lunch_item=total_quantity_of_all_lunch_item lunch_items=lunch_items %}
+  {% include "includes/table_head.html"  %}
+  {% include "includes/combined_table.html"   %}
+  {% include "includes/table_foot.html" %}
 </table>
 {% endblock %}

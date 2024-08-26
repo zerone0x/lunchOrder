@@ -8,15 +8,13 @@ Lunch Report
 <div>
   {% for lunch_item in lunch_items %}
   <header>
-    <h2>{{lunch_item.name}} Report</h2>
+    <h1>{{lunch_item.name}} Report</h1>
   </header>
-  {% with orders_detail=orders_detail|get_item:lunch_item.name each_type_orders_detail=orders_detail|get_item:lunch_item.name each_type_total_quantity=total_quantity_of_all_lunch_item|get_item:lunch_item.name %}
+  {% with orders_detail=orders_detail|get_item:lunch_item.name each_type_orders_detail=orders_detail|get_item:lunch_item.name single_total_quantity=total_lunch_item_quantities|get_item:lunch_item.name %}
   <table>
     {% include "includes/table_head.html" with single_item=lunch_item.name %}
-
- {% include "includes/order_table.html" with orders_detail=orders_detail %}
-
- {% include "includes/table_foot.html" with single_total_quantity=each_type_total_quantity %}
+ {% include "includes/order_table.html" %}
+ {% include "includes/table_foot.html" %}
     </table>
     {% endwith %}
  {% endfor %}

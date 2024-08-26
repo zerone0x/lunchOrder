@@ -31,8 +31,12 @@ def populate_pdf_response(*, report_title, report_template, **kwargs):
         table {{
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 1rem;
         }}
-
+        h1{{
+            text-align: center;
+            margin-bottom: 1rem;
+        }}
         tr, td {{
             border: 1px solid #000;
             padding: 2px;
@@ -41,12 +45,17 @@ def populate_pdf_response(*, report_title, report_template, **kwargs):
 
         th {{
             font-weight: bold;
-            background-color: grey;
+            background-color: #f0f0f0;
         }}
 
         .total-quantity-row {{
             font-weight: bold;
-            background-color: #e0e0e0;
+            background-color: #d3d3d3;
+        }}
+        
+        .total-row{{
+            font-weight: bold;
+            background-color: #f0f0f0;
         }}
     </style>
     {html}

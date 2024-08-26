@@ -8,10 +8,9 @@
                     <td>{{ quantity }}</td>
                 </tr>
                 {% endfor %}
-                {% comment %} TODO - add css for total {% endcomment %}
-            <tr>
-                <td>Total</td>
-                <td>{{ data.group_quantity }}</td>
+            <tr >
+                <td class="total-row">Total</td>
+                <td class="total-row">{{ data.group_quantity }}</td>
             </tr>
         {% else %}
             {% for customer_name, quantity in data.customers.items %}

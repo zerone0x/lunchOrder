@@ -24,7 +24,7 @@ def _get_lunch_items_from_request(request):
   return lunch_item_model_list
 
 def generate_report_title(lunch_items):
-    names = ' '.join(item.name for item in lunch_items)
+    names = ', '.join(item.name for item in lunch_items)
     return f'{names} Report'
 
 def _calculate_lunch_item_total_quantity(lunch_item):
@@ -99,33 +99,30 @@ def _get_students_grouped_by_teacher():
     Retrieve all teachers and their associated students.
     """
     teachers_with_students = Teacher.objects.prefetch_related(Prefetch('students')).all()
-    teacher_student_data = {teacher.name: [student.name for student in teacher.students.all()] + [teacher.name] for teacher in teachers_with_students}
+    teacher_student_mapping = {teacher.name: [student.name for student in teacher.students.all()] + [teacher.name] for teacher in teachers_with_students}
 
     students_without_teacher = Student.objects.filter(teacher__isnull=True)
-    teacher_student_data['-'] = [student.name for student in students_without_teacher]
-    return teacher_student_data
-
-
-
+    teacher_student_mapping['-'] = [student.name for student in students_without_teacher]
+    return teacher_student_mapping
 
 
 def lunch_report(request):
     try:
         lunch_items = _get_lunch_items_from_request(request)
-        total_quantity_of_all_lunch_item = _calculate_total_quantities(lunch_items)
+        total_lunch_item_quantities = _calculate_total_quantities(lunch_items)
         orders_detail =  _get_orders_grouped_by_teacher(lunch_items)
 
         # return render(request, 'lunch_order_report.html', {
         #     'lunch_items': lunch_items,
         #     'title': 'Lunch Order Report',
-        #     'total_quantity_of_all_lunch_item': total_quantity_of_all_lunch_item,
+        #     'total_lunch_item_quantities': total_lunch_item_quantities,
         #     'orders_detail': orders_detail,
         # })
         return populate_pdf_response(
         report_title="Lunch Order Report by Item",
         report_template="lunchreports/templates/lunch_order_report.html",
         lunch_items=lunch_items,
-        total_quantity_of_all_lunch_item=total_quantity_of_all_lunch_item,
+        total_lunch_item_quantities=total_lunch_item_quantities,
         orders_detail=orders_detail,
         )
     except Exception as e:
@@ -139,25 +136,25 @@ def combined_lunch_report(request):
     try:
         lunch_items = _get_lunch_items_from_request(request)
         title = generate_report_title(lunch_items)
-        total_quantity_of_all_lunch_item = _calculate_total_quantities(lunch_items)
+        total_lunch_item_quantities = _calculate_total_quantities(lunch_items)
         orders_detail =  _get_orders_grouped_by_teacher(lunch_items)
-        teacher_student_data = _get_students_grouped_by_teacher()
-
+        teacher_student_mapping = _get_students_grouped_by_teacher()
+        print(teacher_student_mapping)
         # return render(request, 'combined_order_report.html', {
         #     "title": title,
         #     "orders_detail": orders_detail,
-        #     "total_quantity_of_all_lunch_item": total_quantity_of_all_lunch_item,
+        #     "total_lunch_item_quantities": total_lunch_item_quantities,
         #     "lunch_items": lunch_items,
-        #     "teacher_student_data": teacher_student_data,
+        #     "teacher_student_mapping": teacher_student_mapping,
         # })
         return populate_pdf_response(
         report_title="Combined Lunch Order Report",
         report_template="lunchreports/templates/combined_order_report.html",
         title=title,
         orders_detail=orders_detail,
-        total_quantity_of_all_lunch_item=total_quantity_of_all_lunch_item,
+        total_lunch_item_quantities=total_lunch_item_quantities,
         lunch_items=lunch_items,
-        teacher_student_data=teacher_student_data
+        teacher_student_mapping=teacher_student_mapping
         )
     except Exception as e:
         logging.error(f"Error generating combined lunch report: {e}")

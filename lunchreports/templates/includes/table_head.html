@@ -3,10 +3,10 @@
         <th>Teacher</th>
         <th>Student</th>
         {% if single_item %}
-            <th>{{ single_item }}</th>
+            <th>{{ single_item }} Quantity</th>
         {% else %}
-            {% for item in items %}
-                <th>{{ item.name }}</th>
+            {% for item in lunch_items %}
+                <th>{{ item.name }} Quantity</th>
             {% endfor %}
         {% endif %}
     </tr>

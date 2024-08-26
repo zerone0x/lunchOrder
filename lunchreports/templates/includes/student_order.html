@@ -1,0 +1,12 @@
+{% load custom_filters %}
+{% for item in lunch_items %}
+          {% with total=orders_detail|get_item:item.name|get_item:teacher_name %}
+            {% if total %}
+              {% with quantity=total.customers|get_item:student_name %}
+                <td>{{ quantity|default:"-" }}</td>
+              {% endwith %}
+            {% else %}
+              <td>-</td>
+            {% endif %}
+          {% endwith %}
+        {% endfor %}

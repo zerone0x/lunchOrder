@@ -6,7 +6,7 @@
         <td>{{ single_total_quantity }}</td>
         {% else %}
            {% for item in lunch_items %}
-        <td>{{ total_quantity_of_all_lunch_item|get_item:item.name }}</td>
+        <td>{{ total_lunch_item_quantities|get_item:item.name }}</td>
     {% endfor %}
         {% endif %}
     </tr>

@@ -1,50 +1,36 @@
 {% load custom_filters %}
 <tbody>
-  {% for teacher_name, student_data in teacher_student_data.items %}
+  {% for teacher_name, student_data in teacher_student_mapping.items %}
     {% if teacher_name != '-' %}
       <tr>
         <td rowspan="{{ student_data|length|add:1 }}">{{ teacher_name }}</td>
         <td>{{ student_data.0 }}</td>
-        {% for item in lunch_items %}
-          {% with total=orders_detail|get_item:item.name|get_item:teacher_name %}
-            {% if total %}
-              {% with quantity=total.customers|get_item:student_data.0 %}
-                <td>{{ quantity|default:"-" }}</td>
-              {% endwith %}
-            {% else %}
-              <td>-</td>
-            {% endif %}
-          {% endwith %}
-        {% endfor %}
+        {% include "includes/student_order.html" with student_name=student_data.0 %}
       </tr>
-    {% endif %}
-
-    {% for student_name in student_data|slice:"1:" %}
+      {% for student_name in student_data|slice:"1:" %}
       <tr>
-        {% if teacher_name == '-' %}
-          <td>{{ teacher_name }}</td>
-        {% endif %}
         <td>{{ student_name }}</td>
-        {% for item in lunch_items %}
-          {% with total=orders_detail|get_item:item.name|get_item:teacher_name %}
-            {% if total %}
-              {% with quantity=total.customers|get_item:student_name %}
-                <td>{{ quantity|default:"-" }}</td>
-              {% endwith %}
-            {% else %}
-              <td>-</td>
-            {% endif %}
-          {% endwith %}
-        {% endfor %}
+        {% include "includes/student_order.html"%}
       </tr>
     {% endfor %}
+    {% endif %}
+    {% if teacher_name == '-' %}
+    {% for student_name in student_data%}
+      <tr>
+          <td>{{ teacher_name }}</td>
+        <td>{{ student_name }}</td>
+        {% include "includes/student_order.html"%}
+      </tr>
+    {% endfor %}
+    {% endif %}
+    
 
     {% if teacher_name != '-' %}
-      <tr>
-        <td>Total</td>
+      <tr >
+        <td class="total-row">Total</td>
         {% for item in lunch_items %}
           {% with total=orders_detail|get_item:item.name|get_item:teacher_name %}
-            <td>{{ total.group_quantity|default:"-" }}</td>
+            <td class="total-row">{{ total.group_quantity|default:"-" }}</td>
           {% endwith %}
         {% endfor %}
       </tr>
