@@ -6,7 +6,6 @@ from .generate_report import populate_pdf_response
 from collections import defaultdict
 from decimal import Decimal
 import logging  #noqa
-from django.http import Http404
 from django.db.models import F, Value, Case, When, CharField, Sum, Prefetch
 from .models import LunchItemOrder, LunchItem, Teacher, Student
 
@@ -139,7 +138,6 @@ def combined_lunch_report(request):
         total_lunch_item_quantities = _calculate_total_quantities(lunch_items)
         orders_detail =  _get_orders_grouped_by_teacher(lunch_items)
         teacher_student_mapping = _get_students_grouped_by_teacher()
-        print(teacher_student_mapping)
         # return render(request, 'combined_order_report.html', {
         #     "title": title,
         #     "orders_detail": orders_detail,
@@ -158,6 +156,5 @@ def combined_lunch_report(request):
         )
     except Exception as e:
         logging.error(f"Error generating combined lunch report: {e}")
-        # Optionally, return an error page or message
         # return render(request, 'error_page.html', {"error": "An error occurred while generating the report."})
     
