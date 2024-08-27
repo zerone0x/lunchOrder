@@ -22,43 +22,45 @@ def populate_pdf_response(*, report_title, report_template, **kwargs):
       },
   )
   html = f"""
-    <style>
-        body {{
-            margin: auto;
-            width: 90%;
-        }}
+<style>
+    body {{
+        margin: auto;
+        width: 90%;
+    }}
 
-        table {{
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 1rem;
-        }}
-        h1{{
-            text-align: center;
-            margin-bottom: 1rem;
-        }}
-        tr, td {{
-            border: 1px solid #000;
-            padding: 2px;
-            text-align: center;
-        }}
+    table {{
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+    }}
 
-        th {{
-            font-weight: bold;
-            background-color: #f0f0f0;
-        }}
+    h1 {{
+        text-align: center;
+        margin-bottom: 1rem;
+    }}
 
-        .total-quantity-row {{
-            font-weight: bold;
-            background-color: #d3d3d3;
-        }}
-        
-        .total-row{{
-            font-weight: bold;
-            background-color: #f0f0f0;
-        }}
-    </style>
-    {html}
+    tr, td {{
+        border: 1px solid #000;
+        padding: 2px;
+        text-align: center;
+    }}
+
+    th {{
+        font-weight: bold;
+        background-color: #f0f0f0;
+    }}
+
+    .total-quantity-row {{
+        font-weight: bold;
+        background-color: #d3d3d3;
+    }}
+
+    .total-row {{
+        font-weight: bold;
+        background-color: #f0f0f0;
+    }}
+</style>
+{html}
 """
   pisa.CreatePDF(html, dest=response)
   return response

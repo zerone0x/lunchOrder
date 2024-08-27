@@ -1,14 +1,16 @@
 {% extends "base.html" %}
- {% load custom_filters %}
- {% block title %}
- {{ title}}
- {% endblock %}
- {% block content %}
-<h1>{{ title }}</h1>
+{% load custom_filters %}
 
-<table>
-  {% include "includes/table_head.html"  %}
-  {% include "includes/combined_table.html"   %}
-  {% include "includes/table_foot.html" %}
-</table>
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+    <h1>{{ title }}</h1>
+
+    <table>
+        {% include "includes/table_head.html" %}
+        {% include "includes/combined_table.html" %}
+        {% include "includes/table_foot.html" %}
+    </table>
 {% endblock %}

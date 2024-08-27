@@ -1,25 +1,22 @@
 {% extends "base.html" %}
 {% load custom_filters %}
 {% load static %}
+
 {% block title %}
 Lunch Report
 {% endblock %}
-{% block content %}
-<div>
-  {% for lunch_item in lunch_items %}
-  <header>
-    <h1>{{lunch_item.name}} Report</h1>
-  </header>
-  {% with orders_detail=orders_detail|get_item:lunch_item.name each_type_orders_detail=orders_detail|get_item:lunch_item.name single_total_quantity=total_lunch_item_quantities|get_item:lunch_item.name %}
-  <table>
-    {% include "includes/table_head.html" with single_item=lunch_item.name %}
- {% include "includes/order_table.html" %}
- {% include "includes/table_foot.html" %}
-    </table>
-    {% endwith %}
- {% endfor %}
-  </div> 
 
+{% block content %}
+  {% for lunch_item in lunch_items %}
+    <h1>{{lunch_item.name}} Report</h1>
+    {% with orders_detail=orders_detail|get_item:lunch_item.name each_type_orders_detail=orders_detail|get_item:lunch_item.name single_total_quantity=total_lunch_item_quantities|get_item:lunch_item.name %}
+      <table>
+        {% include "includes/table_head.html" with single_item=lunch_item.name %}
+        {% include "includes/order_table.html" %}
+        {% include "includes/table_foot.html" %}
+      </table>
+    {% endwith %}
+  {% endfor %}
 {% endblock %}
 
 

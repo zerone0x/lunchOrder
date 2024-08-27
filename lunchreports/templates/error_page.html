@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% load static %}
+
+{% block title %}
+Error
+{% endblock %}
+
+{% block content %}
+<h1>Error</h1>
+<p>{{ error }}</p>
+<p>Please try again later or <a href="{% url 'index' %}">return to the homepage</a>.</p>
+{% endblock %}
+
+
+
+

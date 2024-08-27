@@ -8,10 +8,10 @@
                     <td>{{ quantity }}</td>
                 </tr>
                 {% endfor %}
-            <tr >
-                <td class="total-row">Total</td>
-                <td class="total-row">{{ data.group_quantity }}</td>
-            </tr>
+                <tr>
+                    <td class="total-row">Total</td>
+                    <td class="total-row">{{ data.group_quantity }}</td>
+                </tr>
         {% else %}
             {% for customer_name, quantity in data.customers.items %}
                 <tr>
@@ -22,4 +22,4 @@
             {% endfor %}
         {% endif %}
     {% endfor %}
-  </tbody>
+</tbody>

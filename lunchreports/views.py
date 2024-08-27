@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404,render
+from django.shortcuts import render
 from django.views import View
 from .models import Student, Teacher, LunchItem, LunchItemOrder
 from django.core.exceptions import ValidationError
@@ -12,7 +12,6 @@ from .models import LunchItemOrder, LunchItem, Teacher, Student
 def index(request):
   return render(request, 'index.html')
 
-
 def _get_lunch_items_from_request(request):
   lunch_item_names = ",".join(request.GET.getlist('lunch_items'))
   lunch_item_names = lunch_item_names.split(",")
@@ -23,24 +22,39 @@ def _get_lunch_items_from_request(request):
   return lunch_item_model_list
 
 def generate_report_title(lunch_items):
+    """
+    Generate a report title based on the provided lunch items.
+    
+    :param lunch_items: List of LunchItem objects.
+    :return: A string representing the report title.
+    """
     names = ', '.join(item.name for item in lunch_items)
     return f'{names} Report'
 
 def _calculate_lunch_item_total_quantity(lunch_item):
     """
-    Calculate the total quantity for a given lunch item.
+    Calculate the total quantity ordered for a specific lunch item.
+    
+    :param lunch_item: A LunchItem object.
+    :return: Total quantity ordered.
     """
     return LunchItemOrder.objects.filter(lunch_item=lunch_item).aggregate(total=Sum('quantity'))['total'] or 0
 
 def _calculate_total_quantities(lunch_items):
     """
-    Calculate the total quantity for a list of lunch items.
+    Calculate total quantities for a list of lunch items.
+    
+    :param lunch_items: List of LunchItem objects.
+    :return: Dictionary mapping item names to their total ordered quantities.
     """
     return {item.name: _calculate_lunch_item_total_quantity(item) for item in lunch_items}
 
 def _fetch_lunch_item_order_details(lunch_item):
     """
-    Fetch order details grouped by teacher.
+    Fetch detailed order information for a given lunch item, grouped by teacher.
+    
+    :param lunch_item: A LunchItem object.
+    :return: QuerySet of order details annotated with customer and teacher names.
     """
     return (
         LunchItemOrder.objects
@@ -66,7 +80,10 @@ def _fetch_lunch_item_order_details(lunch_item):
 
 def _group_orders_by_teacher(lunch_item_orders):
     """
-    Organize orders by teacher.
+    Group lunch item orders by teacher.
+    
+    :param lunch_item_orders: QuerySet of order details.
+    :return: Dictionary grouping orders by teacher name.
     """
     grouped_orders = {}
     for order in lunch_item_orders:
@@ -86,16 +103,21 @@ def _group_orders_by_teacher(lunch_item_orders):
 
     return ordered_grouped
 
-def  _get_orders_grouped_by_teacher(lunch_items):
+def _get_orders_grouped_by_teacher(lunch_items):
     """
-    Get grouped orders for a list of lunch items.
+    Get orders grouped by teacher for each lunch item.
+    
+    :param lunch_items: List of LunchItem objects.
+    :return: Dictionary mapping item names to grouped order details.
     """
     return {item.name: _group_orders_by_teacher(_fetch_lunch_item_order_details(item)) 
             for item in lunch_items}
-            
+
 def _get_students_grouped_by_teacher():
     """
-    Retrieve all teachers and their associated students.
+    Retrieve a mapping of teachers to their associated students.
+    
+    :return: Dictionary mapping teacher names to lists of their students.
     """
     teachers_with_students = Teacher.objects.prefetch_related(Prefetch('students')).all()
     teacher_student_mapping = {teacher.name: [student.name for student in teacher.students.all()] + [teacher.name] for teacher in teachers_with_students}
@@ -104,57 +126,59 @@ def _get_students_grouped_by_teacher():
     teacher_student_mapping['-'] = [student.name for student in students_without_teacher]
     return teacher_student_mapping
 
+def _prepare_lunch_report_data(request):
+    """
+    Prepare data required for generating lunch reports.
+    
+    :param request: HTTP request object.
+    :return: Tuple containing lunch items, their total quantities, and order details.
+    """
+    lunch_items = _get_lunch_items_from_request(request)
+    total_lunch_item_quantities = _calculate_total_quantities(lunch_items)
+    orders_detail = _get_orders_grouped_by_teacher(lunch_items)
+    return lunch_items, total_lunch_item_quantities, orders_detail
 
 def lunch_report(request):
+    """
+    Generate and return a PDF response for the lunch order report.
+    
+    :param request: HTTP request object.
+    :return: HTTP response with the generated PDF report.
+    """
     try:
-        lunch_items = _get_lunch_items_from_request(request)
-        total_lunch_item_quantities = _calculate_total_quantities(lunch_items)
-        orders_detail =  _get_orders_grouped_by_teacher(lunch_items)
-
-        # return render(request, 'lunch_order_report.html', {
-        #     'lunch_items': lunch_items,
-        #     'title': 'Lunch Order Report',
-        #     'total_lunch_item_quantities': total_lunch_item_quantities,
-        #     'orders_detail': orders_detail,
-        # })
+        lunch_items, total_lunch_item_quantities, orders_detail = _prepare_lunch_report_data(request)
         return populate_pdf_response(
-        report_title="Lunch Order Report by Item",
-        report_template="lunchreports/templates/lunch_order_report.html",
-        lunch_items=lunch_items,
-        total_lunch_item_quantities=total_lunch_item_quantities,
-        orders_detail=orders_detail,
+            report_title="Lunch Order Report by Item",
+            report_template="lunchreports/templates/lunch_order_report.html",
+            lunch_items=lunch_items,
+            total_lunch_item_quantities=total_lunch_item_quantities,
+            orders_detail=orders_detail,
         )
     except Exception as e:
         logging.error(f"Error generating lunch report: {e}")
-        raise
-  
-
-
+        return render(request, 'error_page.html', {"error": "An error occurred while generating the report."})
 
 def combined_lunch_report(request):
+    """
+    Generate and return a PDF response for the combined lunch order report.
+    
+    :param request: HTTP request object.
+    :return: HTTP response with the generated PDF report.
+    """
     try:
-        lunch_items = _get_lunch_items_from_request(request)
+        lunch_items, total_lunch_item_quantities, orders_detail = _prepare_lunch_report_data(request)
         title = generate_report_title(lunch_items)
-        total_lunch_item_quantities = _calculate_total_quantities(lunch_items)
-        orders_detail =  _get_orders_grouped_by_teacher(lunch_items)
         teacher_student_mapping = _get_students_grouped_by_teacher()
-        # return render(request, 'combined_order_report.html', {
-        #     "title": title,
-        #     "orders_detail": orders_detail,
-        #     "total_lunch_item_quantities": total_lunch_item_quantities,
-        #     "lunch_items": lunch_items,
-        #     "teacher_student_mapping": teacher_student_mapping,
-        # })
+
         return populate_pdf_response(
-        report_title="Combined Lunch Order Report",
-        report_template="lunchreports/templates/combined_order_report.html",
-        title=title,
-        orders_detail=orders_detail,
-        total_lunch_item_quantities=total_lunch_item_quantities,
-        lunch_items=lunch_items,
-        teacher_student_mapping=teacher_student_mapping
+            report_title="Combined Lunch Order Report",
+            report_template="lunchreports/templates/combined_order_report.html",
+            title=title,
+            orders_detail=orders_detail,
+            total_lunch_item_quantities=total_lunch_item_quantities,
+            lunch_items=lunch_items,
+            teacher_student_mapping=teacher_student_mapping
         )
     except Exception as e:
         logging.error(f"Error generating combined lunch report: {e}")
-        # return render(request, 'error_page.html', {"error": "An error occurred while generating the report."})
-    
+        return render(request, 'error_page.html', {"error": "An error occurred while generating the report."})
